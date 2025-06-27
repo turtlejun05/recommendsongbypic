@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_samples, silhouette_score
 
 # Load dataset
 df = pd.read_csv("data.csv")
@@ -11,9 +12,30 @@ features = df[['valence', 'energy', 'danceability', 'acousticness', 'instrumenta
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(features)
 
-# Train KMeans model
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Dense
+from tensorflow.keras.optimizers import Adam
+
+# Autoencoder 구성
+input_dim = X_scaled.shape[1]
+encoding_dim = 3
+
+input_layer = Input(shape=(input_dim,))
+encoded = Dense(encoding_dim, activation='relu')(input_layer)
+decoded = Dense(input_dim, activation='linear')(encoded)
+
+autoencoder = Model(inputs=input_layer, outputs=decoded)
+encoder = Model(inputs=input_layer, outputs=encoded)
+
+autoencoder.compile(optimizer=Adam(learning_rate=0.01), loss='mse')
+autoencoder.fit(X_scaled, X_scaled, epochs=50, batch_size=256, shuffle=True, verbose=0)
+
+# 인코딩된 특징 추출
+X_encoded = encoder.predict(X_scaled)
+
+# Train KMeans model (on encoded data)
 kmeans = KMeans(n_clusters=6, random_state=42)
-df['mood_cluster'] = kmeans.fit_predict(X_scaled)
+df['mood_cluster'] = kmeans.fit_predict(X_encoded)
 
 # Map clusters to mood labels
 mood_labels = {
@@ -30,27 +52,37 @@ df['mood_label'] = df['mood_cluster'].map(mood_labels)
 def recommend_song(valence, energy, danceability, acousticness, instrumentalness, liveness, top_n=5):
     user_input = np.array([[valence, energy, danceability, acousticness, instrumentalness, liveness]])
     user_scaled = scaler.transform(user_input)
-    cluster = kmeans.predict(user_scaled)[0]
+    user_encoded = encoder.predict(user_scaled)
+    cluster = kmeans.predict(user_encoded)[0]
     mood = mood_labels[cluster]
     recs = df[df['mood_cluster'] == cluster].sample(n=top_n)[['name', 'artists', 'mood_label']]
     return mood, recs
 
 if __name__ == "__main__":
     print("🎵 분위기에 따른 음악 추천기 🎵")
-    valence = float(input("valence (0~1): "))
-    energy = float(input("energy (0~1): "))
-    danceability = float(input("danceability (0~1): "))
-    acousticness = float(input("acousticness (0~1): "))
-    instrumentalness = float(input("instrumentalness (0~1): "))
-    liveness = float(input("liveness (0~1): "))
+    # 전체 실루엣 계수 출력
+    score = silhouette_score(X_encoded, df['mood_cluster'])
+    print(f"📊 전체 실루엣 계수 (평균): {score:.3f}")
 
-    mood, recommendations = recommend_song(
-        valence, energy, danceability, acousticness, instrumentalness, liveness
-    )
+    for k in range(2, 10):
+        km = KMeans(n_clusters=k, random_state=42)
+        labels = km.fit_predict(X_encoded)
+        score = silhouette_score(X_encoded, labels)
+        print(f"k={k} → 실루엣 계수={score:.3f}")
+    # valence = float(input("valence (0~1): "))
+    # energy = float(input("energy (0~1): "))
+    # danceability = float(input("danceability (0~1): "))
+    # acousticness = float(input("acousticness (0~1): "))
+    # instrumentalness = float(input("instrumentalness (0~1): "))
+    # liveness = float(input("liveness (0~1): "))
 
-    print(f"\n🎧 예측된 분위기: {mood}")
-    print("🎵 추천된 노래:")
-    print(recommendations.to_string(index=False))
+    # mood, recommendations = recommend_song(
+    #     valence, energy, danceability, acousticness, instrumentalness, liveness
+    # )
+
+    # print(f"\n🎧 예측된 분위기: {mood}")
+    # print("🎵 추천된 노래:")
+    # print(recommendations.to_string(index=False))
 
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
