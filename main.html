@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>이미지 기반 음악 추천</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="main.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">NOIDEA.</div>
+  </header>
+
+  <main>
+    <h1>이미지 기반 음악 추천</h1>
+    <p class="subtext">이미지를 업로드하면 <span class="highlight">어울리는 음악</span>을 추천해드려요!</p>
+
+    <div class="upload-box" id="uploadBox">
+      <label for="imageInput" class="file-label">
+        <span>파일 선택</span>
+        <input type="file" id="imageInput" accept="image/*" hidden multiple />
+      </label>
+      <p class="file-info">최대 파일 크기 1GB.</p>
+    </div>
+
+    <div id="imagePreviewContainer" class="preview-area" style="display: none;"></div>
+
+    <button id="recommendButton" style="display: none;">음악 추천 받기</button>
+
+    <div id="keywordResult" style="display: none;" class="result-section">
+      <p class="label">이미지 키워드</p>
+      <div class="tags">
+        <span>#산뜻한</span>
+        <span>#발랄한</span>
+        <span>#시원한</span>
+      </div>
+    </div>
+
+    <div id="musicResult" style="display: none;" class="result-section">
+      <p class="label">추천하는 음악</p>
+      <ul id="musicList" class="music-list"></ul>
+    </div>
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>
