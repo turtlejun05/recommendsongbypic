@@ -1,8 +1,9 @@
+import torch
 from PIL import Image
 from transformers import CLIPProcessor, CLIPModel
-import torch
+import os # 파일 경로 존재 여부를 확인하기 위해 os 모듈을 추가..
 
-# 키워드 리스트와 우선순위 정의 (기존과 동일)
+# 키워드 리스트와 우선순위 정의
 keywords = [
     # 감정
     "행복한", "웃는 얼굴", "기쁜 표정", "슬픈", "눈물 흘리는", "외로운", "우울한", "평화로운", "설레는", "감동적인",
@@ -50,10 +51,30 @@ def get_keywords_from_image(image: Image.Image):
 
 def get_top_emotion(image_path):
     """이미지에서 키워드 3개 추출 (감정 1개 + 기타 2개)"""
-    image = Image.open(image_path)
-    result = get_keywords_from_image(image)
-    return result  # 키워드 3개 리스트 반환
+    try:
+        # 파일을 열기 전에 해당 경로에 파일이 실제로 존재하는지 확인
+        if not os.path.exists(image_path):
+            print(f"경고: 지정된 이미지 경로에 파일이 없어요: {image_path}")
+            # 파일이 없으면 에러 메시지를 포함한 리스트를 반환해서 서버에 알려주기
+            return ["파일 없음", "경로 확인", "재시도"] 
+        
+        image = Image.open(image_path) # <<< 이 부분에서 에러가 날 수 있다그래서 try로 감쌈
+        result = get_keywords_from_image(image)
+        return result
+    except OSError as e:
+        # [Errno 22] Invalid argument와 같은 OSError가 발생하면 여기로
+        print(f"에러: 이미지 '{image_path}'를 열 수 없어요. 원인: {e}")
+        # 서버에서 이 에러를 처리할 수 있도록 에러 메시지를 담은 리스트를 반환
+        return ["이미지 파일 오류", "경로 또는 이름 문제", "확인 필요"]
+    except Exception as e:
+        # 혹시 모르니까.. 오류가 너무 많이 나서
+        print(f"에러: 이미지 '{image_path}' 처리 중 예상치 못한 오류 발생: {e}")
+        return ["알 수 없는 오류", "관리자 문의", "재시도"]
 
 if __name__ == "__main__":
-    # 테스트
+    # 테스트 (sample.jpg 파일이 현재 디렉토리에 있어야 정상 작동)
+    # sample.jpg가 없거나, 경로가 잘못되면 위에 추가된 에러 처리 메시지를 볼 수 있음
     print(get_top_emotion("sample.jpg"))
+    # print(get_top_emotion("없는_파일.jpg")) # 파일이 없는 경우 테스트
+    # print(get_top_emotion("invalid\npath.jpg")) # 유효하지 않은 경로 문자 테스트 (OS에 따라 다름)
+
