@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import random
+
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_samples, silhouette_score
@@ -14,19 +15,19 @@ features = df[['danceability','energy', 'loudness','acousticness','instrumentaln
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(features)
 
+import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.optimizers import Adam
-import tensorflow as tf
 
 # GPU 확인 및 메모리 설정
-print("✅ GPU 사용 가능 여부:", tf.config.list_physical_devices('GPU'))
+print("GPU 사용 가능 여부:", tf.config.list_physical_devices('GPU'))
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
     try:
         for gpu in gpus:
             tf.config.experimental.set_memory_growth(gpu, True)
-        print("🔧 GPU 메모리 성장 설정 완료")
+        print("GPU 메모리 성장 설정 완료")
     except RuntimeError as e:
         print(e)
 
@@ -52,6 +53,7 @@ kmeans = KMeans(n_clusters=5, random_state=42)
 df['mood_cluster'] = kmeans.fit_predict(X_encoded)
 
 # Map clusters to mood labels
+# 요기 clip 이랑 연결 시켜야함
 mood_labels = {
     0: '신나는',
     1: '슬픈',
@@ -80,7 +82,7 @@ def recommend_song(danceability, energy, loudness, acousticness, instrumentalnes
     return mood, recs
 
 if __name__ == "__main__":
-    print("🎵 분위기에 따른 음악 추천기 🎵")
+    print("분위기에 따른 음악 추천기")
     k = int(input("추천할 노래의 타입"))
     if k < 0 or k > 5:
         print("잘못된 입력입니다. 0에서 5 사이의 숫자를 입력하세요.")
@@ -97,8 +99,8 @@ if __name__ == "__main__":
         danceability,energy, loudness,acousticness,instrumentalness,valence, tempo
     )
 
-    print(f"\n🎧 예측된 분위기: {mood}")
-    print("🎵 추천된 노래:")
+    print(f"\n 예측된 분위기: {mood}")
+    print("추천된 노래:")
     print(recommendations.to_string(index=False))
 
 import matplotlib.pyplot as plt
@@ -121,7 +123,6 @@ def plot_clusters():
     }
 
     import matplotlib
-    matplotlib.rc('font', family='AppleGothic')  # macOS용 한글 폰트 설정
     plt.rcParams['axes.unicode_minus'] = False  # 마이너스 기호 깨짐 방지
 
     plt.figure(figsize=(10, 6))
