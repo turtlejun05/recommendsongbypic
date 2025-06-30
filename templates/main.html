@@ -7,10 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="main.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" />
 </head>
 <body>
   <header>
+    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="로고" class="logo-image" />
     <div class="logo">NOIDEA.</div>
   </header>
 
@@ -45,6 +46,6 @@
     </div>
   </main>
 
-  <script src="main.js"></script>
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 </html>
