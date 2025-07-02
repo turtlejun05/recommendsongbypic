@@ -15,21 +15,21 @@ features = df[['danceability','energy', 'loudness','acousticness','instrumentaln
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(features)
 
-# Autoencoder
-input_dim = X_scaled.shape[1]
-encoding_dim = 3
-input_layer = Input(shape=(input_dim,))
-encoded = Dense(encoding_dim, activation='relu')(input_layer)
-decoded = Dense(input_dim, activation='linear')(encoded)
-autoencoder = Model(inputs=input_layer, outputs=decoded)
-encoder = Model(inputs=input_layer, outputs=encoded)
-autoencoder.compile(optimizer=Adam(learning_rate=0.01), loss='mse')
-autoencoder.fit(X_scaled, X_scaled, epochs=10, batch_size=512, shuffle=True, verbose=0)
+# # Autoencoder
+# input_dim = X_scaled.shape[1]
+# encoding_dim = 3
+# input_layer = Input(shape=(input_dim,))
+# encoded = Dense(encoding_dim, activation='relu')(input_layer)
+# decoded = Dense(input_dim, activation='linear')(encoded)
+# autoencoder = Model(inputs=input_layer, outputs=decoded)
+# encoder = Model(inputs=input_layer, outputs=encoded)
+# autoencoder.compile(optimizer=Adam(learning_rate=0.01), loss='mse')
+# autoencoder.fit(X_scaled, X_scaled, epochs=10, batch_size=512, shuffle=True, verbose=0)
 
-# 인코딩 & KMeans
-X_encoded = encoder.predict(X_scaled)
+# # 인코딩 & KMeans
+# X_encoded = encoder.predict(X_scaled)
 kmeans = KMeans(n_clusters=5, random_state=42)
-df['mood_cluster'] = kmeans.fit_predict(X_encoded)
+df['mood_cluster'] = kmeans.fit_predict(X_scaled)
 
 # 감정 매핑
 mood_labels = {0: '신나는', 1: '슬픈', 2: '설레는', 3: '평화로운', 4: '무거운'}
@@ -60,6 +60,10 @@ def recommend_song_by_emotion(emotion, top_n=5):
     return mood, recs
 
 if __name__ == "__main__":
-    mood, recs = recommend_song_by_emotion("설레는")
-    print(mood)
-    print(recs)
+    k = input("검색할 감정을 입력하세요 0-4: ")
+    if k.isdigit() and 0 <= int(k) <= 4:
+        mood, recs = recommend_song_by_emotion(mood_labels[int(k)])
+        print(mood)
+        print(recs)
+    else:
+        print("잘못된 입력입니다. 감정은 0-4 사이의 숫자로 입력해주세요.")
