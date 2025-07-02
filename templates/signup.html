@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>NOIDEA • 회원가입</title>
+  <link rel="stylesheet" href="/static/login.css" />
+  <script defer src="/static/login.js"></script>
+</head>
+<body>
+  <header>
+    <div class="logo">NOIDEA<span class="dot">•</span></div>
+  </header>
+
+  <main class="login-container">
+    <form action="/signup" method="POST" class="login-box">
+      <h2>회원가입</h2>
+      <div class="input-group">
+        <input type="text" name="nickname" id="nickname" placeholder="닉네임" />
+        <button type="button" id="checkNicknameBtn">중복확인</button>
+      </div>
+      <input type="text" name="username" id="username" placeholder="아이디" />
+      <input type="password" name="password" id="password" placeholder="비밀번호" />
+      <button type="submit" class="login-btn">가입하기</button>
+    </form>
+  </main>
+</body>
+</html>
