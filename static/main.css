@@ -36,7 +36,7 @@ main {
   max-width: 600px;
   margin: 120px auto 60px;
   text-align: center;
-  padding: 0 20px;
+  padding: 0 20px 0 270px;
 }
 
 h1 {
@@ -145,4 +145,67 @@ h1 {
   font-weight: 500;
   font-size: 15px;
   color: #563D2C;
+}
+
+.nickname-check-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+#nickname {
+  padding: 10px;
+  font-size: 16px;
+  border: 1.5px solid #444d3b;
+  border-radius: 8px 0 0 8px;
+  width: 0;
+  flex: 0 1 60%;
+  box-sizing: border-box;
+  height: 44px;
+}
+
+#checkNicknameBtn {
+  background-color: #444d3b;
+  color: #fff;
+  border: 1.5px solid #444d3b;
+  border-radius: 8px;
+  padding: 0 18px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+  height: 44px;
+  min-width: 90px;
+  margin-left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#checkNicknameBtn:hover {
+  background-color: #3a422e;
+}
+
+input[type="text"], input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1.5px solid #444d3b;
+  border-radius: 8px;
+  box-sizing: border-box;
+  height: 44px;
+  margin-bottom: 10px;
+}
+
+#nicknameCheckMsg {
+  font-size: 13px;
+  margin-top: 2px;
+  margin-bottom: 10px;
+  min-height: 18px;
+}
+
+.auth-center {
+  max-width: 400px;
+  margin: 160px auto 60px auto;
+  text-align: center;
+  padding: 0 20px;
+  display: block;
 }

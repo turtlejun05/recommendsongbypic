@@ -71,10 +71,9 @@ def get_top_emotion(image_path):
         print(f"에러: 이미지 '{image_path}' 처리 중 예상치 못한 오류 발생: {e}")
         return ["알 수 없는 오류", "관리자 문의", "재시도"]
 
-if __name__ == "__main__":
-    # 테스트 (sample.jpg 파일이 현재 디렉토리에 있어야 정상 작동)
-    # sample.jpg가 없거나, 경로가 잘못되면 위에 추가된 에러 처리 메시지를 볼 수 있음
-    print(get_top_emotion("sample.jpg"))
-    # print(get_top_emotion("없는_파일.jpg")) # 파일이 없는 경우 테스트
-    # print(get_top_emotion("invalid\npath.jpg")) # 유효하지 않은 경로 문자 테스트 (OS에 따라 다름)
+__all__ = ["get_top_emotion"]
+
+# 아래 테스트 코드는 완전히 삭제하거나, 주석 처리하세요.
+# if __name__ == "__main__":
+#     print(get_top_emotion("sample.jpg"))
 

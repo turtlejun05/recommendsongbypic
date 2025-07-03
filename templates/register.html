@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입</title>
+    <link rel="stylesheet" href="/static/main.css">
+</head>
+<body>
+    <header>
+        <img src="/static/logo.jpg" alt="로고" class="logo-image">
+        <span class="logo">NOIDEA.</span>
+    </header>
+    <main class="auth-center">
+        <h1>회원가입</h1>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        <div class="upload-box" style="max-width:350px; margin:30px auto;">
+            <form method="post" id="registerForm">
+                <input type="text" name="nickname" id="nickname" placeholder="닉네임" required style="width:80%;padding:10px;margin-bottom:10px;" maxlength="10"><br>
+                <div style="width:80%;margin:0 auto;text-align:center;">
+                    <button type="button" id="checkNicknameBtn" style="width:100%;margin-bottom:5px;">중복확인</button>
+                </div>
+                <div id="nicknameCheckMsg" style="font-size:13px; margin-bottom:10px;"></div>
+                <input type="text" name="username" placeholder="아이디" required style="width:80%;padding:10px;margin-bottom:10px;"><br>
+                <input type="password" name="password" placeholder="비밀번호" required style="width:80%;padding:10px;margin-bottom:20px;"><br>
+                <button type="submit" id="recommendButton" style="width:85%;">회원가입</button>
+            </form>
+        </div>
+        <div style="margin-top:20px; text-align:center;">
+            계정이 있으신가요? <a href="{{ url_for('login') }}">로그인</a>
+        </div>
+    </main>
+    <script>
+    let nicknameChecked = false;
+    let lastCheckedNickname = '';
+
+    document.getElementById('checkNicknameBtn').onclick = function() {
+        var nickname = document.getElementById('nickname').value;
+        var msg = document.getElementById('nicknameCheckMsg');
+        if (!nickname) {
+            msg.textContent = '닉네임을 입력하세요.';
+            msg.style.color = 'red';
+            nicknameChecked = false;
+            return;
+        }
+        fetch('/check_nickname', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'nickname=' + encodeURIComponent(nickname)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.result === 'duplicate') {
+                msg.textContent = '이미 사용 중인 닉네임입니다.';
+                msg.style.color = 'red';
+                nicknameChecked = false;
+            } else {
+                msg.textContent = '사용 가능한 닉네임입니다!';
+                msg.style.color = 'green';
+                nicknameChecked = true;
+                lastCheckedNickname = nickname;
+            }
+        })
+        .catch(() => {
+            msg.textContent = '오류가 발생했습니다.';
+            msg.style.color = 'red';
+            nicknameChecked = false;
+        });
+    };
+
+    document.getElementById('registerForm').onsubmit = function(e) {
+        var nickname = document.getElementById('nickname').value;
+        if (!nicknameChecked || nickname !== lastCheckedNickname) {
+            alert('닉네임 중복확인 해주세요.');
+            e.preventDefault();
+            return false;
+        }
+    };
+
+    document.getElementById('nickname').oninput = function() {
+        if (this.value.length > 10) {
+            alert('닉네임은 10자 이내로 입력해주세요.');
+            this.value = this.value.slice(0, 10);
+        }
+    };
+    </script>
+</body>
+</html> 

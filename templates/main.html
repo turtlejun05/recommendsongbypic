@@ -7,30 +7,157 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" />
+  <style>
+    .sidebar {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      width: 250px;
+      height: calc(100% - 70px);
+      background: #f7f6f3;
+      border: none;
+      border-radius: 0;
+      box-shadow: 0 4px 24px rgba(68,77,59,0.10), 0 1.5px 0 #e0dfd8;
+      padding: 38px 18px 18px 18px;
+      z-index: 1100;
+      display: flex !important;
+      flex-direction: column;
+      gap: 18px;
+      transition: box-shadow 0.2s, background 0.2s;
+      border-top: 2.5px solid #e0dfd8;
+      box-shadow: 0 4px 24px rgba(68,77,59,0.10), 0 -2.5px 0 #e0dfd8 inset;
+    }
+    .sidebar-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #444d3b;
+      margin-bottom: 14px;
+      letter-spacing: -1px;
+      text-align: left;
+      padding-left: 2px;
+    }
+    .history-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .history-item {
+      border-bottom: 1px solid #e0dfd8;
+      padding: 12px 0 10px 0;
+      cursor: pointer;
+      transition: background 0.15s, box-shadow 0.15s;
+      border-radius: 0;
+      margin-bottom: 2px;
+    }
+    .history-item:last-child { border-bottom: none; }
+    .history-item:hover {
+      background: #edece7;
+      box-shadow: 0 2px 8px rgba(68,77,59,0.07);
+    }
+    .history-date {
+      font-size: 14px;
+      color: #888;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .history-thumb {
+      width: 54px;
+      height: 54px;
+      border-radius: 0;
+      overflow: hidden;
+      margin-bottom: 6px;
+      border: 1px solid #e0dfd8;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .history-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .history-songs {
+      display: none;
+      margin-top: 6px;
+      font-size: 13px;
+      color: #563D2C;
+      background: #f7f6f3;
+      border-radius: 6px;
+      padding: 7px 10px;
+    }
+    .history-item.open .history-songs {
+      display: block;
+    }
+    main {
+      margin-left: 270px;
+    }
+    @media (max-width: 900px) {
+      .sidebar { display: none !important; }
+      main { margin-left: 0; }
+    }
+    .logo {
+      font-family: 'Jua', 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      letter-spacing: 1px;
+      color: #6C705E !important;
+    }
+  </style>
 </head>
 <body>
+  <div class="sidebar" id="sidebar" style="display:flex;">
+    <div class="sidebar-title"><span style="color:#7A563E;">{{ nickname }}</span><span style="color:#444d3b;">님</span>의 라이브러리</div>
+    <hr style="border:0; border-top:1.5px solid #e0dfd8; margin: 0 0 18px 0; border-radius:1px;">
+    <ul class="history-list">
+      {% for item in history %}
+      <li class="history-item" onclick="this.classList.toggle('open')" data-index="{{ loop.index0 }}">
+        <button class="history-delete-btn" onclick="deleteHistory(event, {{ loop.index0 }})" title="삭제" style="float:right; background:none; border:none; color:#b44; font-size:18px; cursor:pointer;">×</button>
+        <div class="history-date">{{ item.date }}</div>
+        <div class="history-thumb">
+          <img src="/{{ item.image }}" alt="썸네일" />
+        </div>
+        <div style="font-size:15px; color:#333; font-weight:500; margin-bottom:3px;">{{ item.date }}</div>
+        <div class="history-songs">
+          <b>추천곡</b>
+          <ul style="margin:5px 0 0 0; padding-left:18px;">
+            {% for song in item.songs %}
+            <li>{{ song['name'] }} - {{ song['artist'] }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </li>
+      {% else %}
+      <li style="color:#aaa; font-size:14px;">최근 추천 기록이 없습니다.</li>
+      {% endfor %}
+    </ul>
+  </div>
   <header>
-    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="로고" class="logo-image" />
-    <div class="logo">NOIDEA.</div>
+    <img src="/static/logo.jpg" alt="로고" class="logo-image">
+    <a href="/main" class="logo" style="text-decoration:none; color:inherit;">NOIDEA.</a>
+    {% if nickname %}
+    <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:16px; color:#444;">안녕하세요, {{ nickname }}님!</span>
+        <a href="{{ url_for('logout') }}" style="background:#444d3b; color:#fff; padding:7px 16px; border-radius:5px; text-decoration:none; font-size:15px;">로그아웃</a>
+    </div>
+    {% endif %}
   </header>
-
   <main>
     <h1>이미지 기반 음악 추천</h1>
     <p class="subtext">이미지를 업로드하면 <span class="highlight">어울리는 음악</span>을 추천해드려요!</p>
-
     <div class="upload-box" id="uploadBox">
       <label for="imageInput" class="file-label">
         <span>파일 선택</span>
         <input type="file" id="imageInput" accept="image/*" hidden multiple />
       </label>
-      <p class="file-info">최대 파일 크기 1GB.</p>
+      <p class="file-info">사진은 한장씩 넣어주세요.</p>
     </div>
-
     <div id="imagePreviewContainer" class="preview-area" style="display: none;"></div>
-
     <button id="recommendButton" style="display: none;">음악 추천 받기</button>
-
     <div id="keywordResult" style="display: none;" class="result-section">
       <p class="label">이미지 키워드</p>
       <div class="tags">
@@ -39,13 +166,40 @@
         <span>#시원한</span>
       </div>
     </div>
-
     <div id="musicResult" style="display: none;" class="result-section">
       <p class="label">추천하는 음악</p>
       <ul id="musicList" class="music-list"></ul>
     </div>
   </main>
-
   <script src="{{ url_for('static', filename='main.js') }}"></script>
+  <script>
+  // 이미지 한 장만 업로드 제한
+  const imageInput = document.getElementById('imageInput');
+  imageInput.addEventListener('change', function(e) {
+      if (this.files.length > 1) {
+          alert('사진은 한장씩 넣어주세요.');
+          this.value = '';
+      }
+  });
+  function deleteHistory(e, idx) {
+    e.stopPropagation();
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    fetch('/delete_history', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: 'index=' + idx
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.result === 'ok') {
+        const item = document.querySelector('.history-item[data-index="'+idx+'"]');
+        if (item) item.remove();
+      } else {
+        alert('삭제 실패: ' + (data.msg || '알 수 없는 오류'));
+      }
+    })
+    .catch(() => alert('삭제 중 오류가 발생했습니다.'));
+  }
+  </script>
 </body>
 </html>
