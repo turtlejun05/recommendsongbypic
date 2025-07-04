@@ -47,7 +47,8 @@ def register():
             if u['nickname'] == nickname:
                 flash('이미 존재하는 닉네임입니다.')
                 return redirect(url_for('register'))
-        password_hash = generate_password_hash(password)
+        # app.py 내 register 함수에서:
+        password_hash = generate_password_hash(password, method='pbkdf2:sha256')
         write_user(username, password_hash, nickname)
         flash('회원가입이 완료되었습니다. 로그인 해주세요.')
         return redirect(url_for('login'))
@@ -103,9 +104,10 @@ def recommend():
 
         from clip_model import get_top_emotion
         top_keywords = get_top_emotion(image_path)
+        mood_labels = {'슬픈': 0, '무거운': 1, '설레는': 2, '신나는': 3, '평화로운': 4}
 
         from music_model import recommend_song_by_emotion
-        mood, song_df = recommend_song_by_emotion(top_keywords[0])
+        mood, song_df = recommend_song_by_emotion(mood_labels[top_keywords[0]])
         songs = song_df.to_dict(orient='records')
 
         # 히스토리 저장
