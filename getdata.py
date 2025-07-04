@@ -1,5 +1,5 @@
 import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.oauth2 import SpotifyOAuth
 import pandas as pd
 import time
 
@@ -8,19 +8,24 @@ client_id = '95a02d14c9364bbba1688c3fa9893b90'
 client_secret = '1c266ad783e44409b3c722cc878506b1'
 
 # 인증 설정
-auth_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
+auth_manager = SpotifyOAuth(
+    client_id=client_id,
+    client_secret=client_secret,
+    redirect_uri='http://127.0.0.1:8888/callback',
+    scope='user-library-read user-read-private user-read-email user-top-read playlist-read-private playlist-read-collaborative',
+    cache_path='.cache-spotify'  # 캐시 파일 경로
+)
 sp = spotipy.Spotify(auth_manager=auth_manager)
 
 # 수집할 장르 또는 검색어 목록
-search_queries = ['chill', 'sad', 'happy', 'rock', 'jazz', 'electronic']
-
+search_queries = ['chill', 'sad']
 # 최종 저장할 데이터 리스트
 track_data = []
 
 # 각 키워드에 대해 검색 & 오디오 피처 수집
 for query in search_queries:
     print(f"🔍 Searching for: {query}")
-    results = sp.search(q=query, type='track', limit=50)  # 최대 50개
+    results = sp.search(q=query, type='track', limit=1)  # 최대 50개
     tracks = results['tracks']['items']
     
     for track in tracks:
@@ -32,6 +37,7 @@ for query in search_queries:
         
         try:
             features = sp.audio_features([track_id])[0]
+            print(features)
         except:
             continue  # 실패하면 skip
         

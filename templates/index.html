@@ -1,0 +1,32 @@
+<!-- 수정된 로그인 및 회원가입, 경고창 반영 코드 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOIDEA - 로그인</title>
+  <link rel="stylesheet" href="/static/login.css">
+  <script defer src="/static/login.js"></script>
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <div class="logo">NOIDEA.</div>
+    </div>
+  </header>
+
+  <main>
+    <div class="login-box">
+      <h2>로그인</h2>
+      <form id="loginForm" method="POST" action="/login" onsubmit="return validateLogin()">
+        <input type="text" name="username" id="username" placeholder="아이디">
+        <input type="password" name="password" id="password" placeholder="비밀번호">
+        <button type="submit">로그인</button>
+      </form>
+      <div class="signup-link">
+        계정이 없으신가요? <a href="/signup">회원가입</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

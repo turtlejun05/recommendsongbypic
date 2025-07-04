@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import random
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import Model
@@ -15,51 +14,69 @@ features = df[['danceability','energy', 'loudness','acousticness','instrumentaln
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(features)
 
-# Autoencoder
-input_dim = X_scaled.shape[1]
-encoding_dim = 3
+# 1. 입력 차원 정의
+input_dim = X_scaled.shape[1]   # 예: 7 (음악 feature 개수)
+encoding_dim = 3                # 축소할 차원 수
+
+# 2. 입력 레이어
 input_layer = Input(shape=(input_dim,))
-encoded = Dense(encoding_dim, activation='relu')(input_layer)
-decoded = Dense(input_dim, activation='linear')(encoded)
-autoencoder = Model(inputs=input_layer, outputs=decoded)
-encoder = Model(inputs=input_layer, outputs=encoded)
+
+# 3. 인코더 구조
+encoded = Dense(encoding_dim, activation='relu', name="encoder")(input_layer)
+
+# 4. 디코더 구조
+decoded = Dense(input_dim, activation='linear', name="decoder")(encoded)
+
+# 5. 전체 오토인코더 모델: 입력 → 인코딩 → 디코딩
+autoencoder = Model(inputs=input_layer, outputs=decoded, name="autoencoder")
+
+# 6. 인코더 단독 모델
+encoder = Model(inputs=input_layer, outputs=encoded, name="encoder_model")
+
+# 7. 디코더 단독 모델 구성
+# 인코딩된 입력을 받아 복원하는 모델
+encoded_input = Input(shape=(encoding_dim,))
+decoder_layer = autoencoder.get_layer("decoder")(encoded_input)
+decoder = Model(inputs=encoded_input, outputs=decoder_layer, name="decoder_model")
+
+# 8. 모델 컴파일 & 학습
 autoencoder.compile(optimizer=Adam(learning_rate=0.01), loss='mse')
-autoencoder.fit(X_scaled, X_scaled, epochs=10, batch_size=512, shuffle=True, verbose=0)
+
+autoencoder.fit(
+    X_scaled, X_scaled,
+    epochs=50,
+    batch_size=512,
+    shuffle=True,
+    verbose=0
+)
 
 # 인코딩 & KMeans
 X_encoded = encoder.predict(X_scaled)
 kmeans = KMeans(n_clusters=5, random_state=42)
 df['mood_cluster'] = kmeans.fit_predict(X_encoded)
 
+#중심점 특징벡터
+centroids = kmeans.cluster_centers_
+centerfeatures = decoder.predict(centroids)
+
+# print(centerfeatures)
+
 # 감정 매핑
-mood_labels = {0: '신나는', 1: '슬픈', 2: '설레는', 3: '평화로운', 4: '무거운'}
+mood_labels = {0: '슬픈', 1: '무거운', 2: '설레는', 3: '신나는', 4: '평화로운'}
 df['mood_label'] = df['mood_cluster'].map(mood_labels)
 
-# 감정명 -> mood_classifiyer 번호
-emotion_to_id = {'신나는':0, '슬픈':1, '설레는':2, '평화로운':3, '무거운':4}
-
-mood_classifiyer = {
-    0 : [0.9, 0.9, 0.8, random.uniform(0.1, 0.9), random.uniform(0.1, 0.7), 0.9, 0.8],
-    1 : [0.2, 0.3, 0.5, 0.8, random.uniform(0.1, 0.7), 0.2, random.uniform(0.2, 0.7)],
-    2 : [0.7, 0.6, 0.6, random.uniform(0.1, 0.9), random.uniform(0.1, 0.7), 0.8, 0.7],
-    3 : [0.6, 0.2, 0.3, 0.8, random.uniform(0.1, 0.7), 0.6, random.uniform(0.2, 0.7)],
-    4 : [random.uniform(0.1, 0.7), 0.9, 0.8, random.uniform(0.1, 0.9), 0.6, 0.2, 0.5],
-}
-
+# 추천 함수
 def recommend_song_by_emotion(emotion, top_n=5):
-    mood_id = emotion_to_id.get(emotion)
-    if mood_id is None:
-        return None, None
-    danceability, energy, loudness, acousticness, instrumentalness, valence, tempo = mood_classifiyer[mood_id]
-    user_input = np.array([[danceability, energy, loudness, acousticness, instrumentalness, valence, tempo]])
-    user_scaled = scaler.transform(user_input)
-    user_encoded = encoder.predict(user_scaled)
-    cluster = kmeans.predict(user_encoded)[0]
-    mood = mood_labels[cluster]
-    recs = df[df['mood_cluster'] == cluster].sample(n=top_n)[['name', 'artists', 'mood_label']]
+    mood = mood_labels[emotion]
+    recs = df[df['mood_cluster'] == emotion].sample(n=top_n)[['name', 'artists']]
     return mood, recs
 
 if __name__ == "__main__":
-    mood, recs = recommend_song_by_emotion("설레는")
-    print(mood)
-    print(recs)
+    k = 0
+    while k >= 0 and k <= 4:
+        k = int(input("검색할 감정을 입력하세요 0-4: "))
+        mood, recs = recommend_song_by_emotion(k)
+        print(mood)
+        print(recs)
+    else:
+        print("잘못된 입력입니다. 감정은 0-4 사이의 숫자로 입력해주세요.")
