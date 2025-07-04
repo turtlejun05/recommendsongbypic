@@ -86,3 +86,28 @@ recommendButton.addEventListener('click', async function () {
     alert(`추천 요청 중 오류가 발생했습니다: ${error.message || error}`);
   }
 });
+
+// 히스토리 날짜 클릭 시 상세정보 토글
+window.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.history-date').forEach(function(dateElem) {
+    dateElem.addEventListener('click', function() {
+      // 모든 아이템 닫기
+      document.querySelectorAll('.history-item').forEach(function(item) {
+        item.classList.remove('open');
+        const thumb = item.querySelector('.history-thumb');
+        const songs = item.querySelector('.history-songs');
+        if (thumb) thumb.style.display = 'none';
+        if (songs) songs.style.display = 'none';
+      });
+      // 현재 아이템만 열기
+      const parent = this.closest('.history-item');
+      if (parent) {
+        parent.classList.add('open');
+        const thumb = parent.querySelector('.history-thumb');
+        const songs = parent.querySelector('.history-songs');
+        if (thumb) thumb.style.display = 'flex';
+        if (songs) songs.style.display = 'block';
+      }
+    });
+  });
+});

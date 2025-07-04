@@ -137,11 +137,11 @@
       {% for item in history %}
       <li class="history-item" data-index="{{ loop.index0 }}">
         <button class="history-delete-btn" onclick="deleteHistory(event, {{ loop.index0 }})" title="삭제" style="position:absolute; top:8px; right:8px; background:none; border:none; color:#b44; font-size:16px; cursor:pointer; opacity:0.7; transition:opacity 0.2s;">×</button>
-        <div class="history-date">{{ item.date }}</div>
-        <div class="history-thumb">
+        <div class="history-date" style="cursor:pointer;">{{ item.date }}</div>
+        <div class="history-thumb" style="display:none;">
           <img src="/{{ item.image }}" alt="썸네일" />
         </div>
-        <div class="history-songs">
+        <div class="history-songs" style="display:none;">
           <b>추천곡</b>
           <ul style="margin:5px 0 0 0; padding-left:18px;">
             {% for song in item.songs %}
